@@ -48,34 +48,34 @@ This repository contains all information, data and source-code used in my Master
 #### CAFFE INSTALLATION
 
 1. General Dependences
-  sudo apt-get install libprotobuf-dev libleveldb-dev libsnappy-dev libopencv-dev libhdf5-serial-dev protobuf-compiler
-  sudo apt-get install --no-install-recommends libboost-all-dev
+> sudo apt-get install libprotobuf-dev libleveldb-dev libsnappy-dev libopencv-dev libhdf5-serial-dev protobuf-compiler
+> sudo apt-get install --no-install-recommends libboost-all-dev
 
 2. BLAS
-  sudo apt-get install libatlas-base-dev
+> sudo apt-get install libatlas-base-dev
 
 3. OpenCv
-  http://docs.opencv.org/2.4/doc/tutorials/introduction/linux_install/linux_install.html
+> http://docs.opencv.org/2.4/doc/tutorials/introduction/linux_install/linux_install.html
 
 4.  Other Dependences (for Ubuntu 12.04 LTS)
-  -> glog
-	wget https://google-glog.googlecode.com/files/glog-0.3.3.tar.gz
-	tar zxvf glog-0.3.3.tar.gz
-	cd glog-0.3.3
-	make && make install
+> ** glog **
+> wget https://google-glog.googlecode.com/files/glog-0.3.3.tar.gz
+> tar zxvf glog-0.3.3.tar.gz
+> cd glog-0.3.3
+> make && make install
 
-  -> gflags
-	wget https://github.com/schuhschuh/gflags/archive/master.zip
-	unzip master.zip
-	cd gflags-master
-	mkdir build && cd build
-	export CXXFLAGS="-fPIC" && cmake .. && make VERBOSE=1
-	make && make install
+> ** gflags **
+> wget https://github.com/schuhschuh/gflags/archive/master.zip
+> unzip master.zip
+> cd gflags-master
+> mkdir build && cd build
+> export CXXFLAGS="-fPIC" && cmake .. && make VERBOSE=1
+> make && make install
 
-	-> lmdb
-	git clone https://github.com/LMDB/lmdb
-	cd lmdb/libraries/liblmdb
-	make && make install
+> ** lmdb **
+> git clone https://github.com/LMDB/lmdb
+> cd lmdb/libraries/liblmdb
+> make && make install
 	
 5. Download Caffe last version from
   https://github.com/BVLC/caffe
