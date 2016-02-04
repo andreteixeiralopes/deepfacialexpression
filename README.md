@@ -35,6 +35,7 @@ This repository contains all information, data and source-code used in my Master
 
 7. Update Environment Variables
 > export PATH=/usr/local/cuda-7.0/bin:$PATH
+
 > export LD_LIBRARY_PATH=/usr/local/cuda-7.0/lib64:$LD_LIBRARY_PATH
 
 8. Test
@@ -59,7 +60,7 @@ This repository contains all information, data and source-code used in my Master
 
 4.  Other Dependences (for Ubuntu 12.04 LTS)
 
-** glog **
+**glog**
 > wget https://google-glog.googlecode.com/files/glog-0.3.3.tar.gz
 > tar zxvf glog-0.3.3.tar.gz
 > cd glog-0.3.3
