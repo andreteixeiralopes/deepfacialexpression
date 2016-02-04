@@ -19,29 +19,29 @@ This repository contains all information, data and source-code used in my Master
 	- lspci | grep -i nvidia
 
 2. Check for the GCC installation
-- gcc --version
+	- gcc --version
 
 3. Download the CUDA version for your Graphics Card architecture and Operational System. Here I downloaded version 7.0
-- https://developer.nvidia.com/cuda-toolkit-70
+	- https://developer.nvidia.com/cuda-toolkit-70
 
 4. Add the downloaded file to the linux repository
-- sudo dpkg -i cuda-repo-<distro>_<version>_<architecture>.deb
+	- sudo dpkg -i cuda-repo-<distro>_<version>_<architecture>.deb
 
 5. Update the repository
-- sudo apt-get update
+	- sudo apt-get update
 
 6. Install
 - sudo apt-get install cuda
 
 7. Update Environment Variables
-- export PATH=/usr/local/cuda-7.0/bin:$PATH
-- export LD_LIBRARY_PATH=/usr/local/cuda-7.0/lib64:$LD_LIBRARY_PATH
+	- export PATH=/usr/local/cuda-7.0/bin:$PATH
+	- export LD_LIBRARY_PATH=/usr/local/cuda-7.0/lib64:$LD_LIBRARY_PATH
 
 8. Test
-- nvcc -V
+	- nvcc -V
 
 9. (Optional) Install examples.
-- /usr/loca/cuda-7.0/cuda-install-samples-7.0.sh /home
+	- /usr/loca/cuda-7.0/cuda-install-samples-7.0.sh /home
 
 
 #### CAFFE INSTALLATION
