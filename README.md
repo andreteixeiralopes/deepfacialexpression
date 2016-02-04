@@ -13,9 +13,10 @@ This repository contains all information, data and source-code used in my Master
 - Caffe
 
 
-------------------------------------- CUDA INSTALLATION (for Linux Ubuntu 12.04 LTS) -------------------------------------
+#### CUDA INSTALLATION (for Linux Ubuntu 12.04 LTS)
 
-#### 1. Check for CUDA device on the computer. If any, the description of the devices will be shown.
+1. Check for CUDA device on the computer. If any, the description of the devices will be shown.
+
 	lspci | grep -i nvidia
 
 2. Check for the GCC installation
