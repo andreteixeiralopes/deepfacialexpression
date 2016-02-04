@@ -58,13 +58,14 @@ This repository contains all information, data and source-code used in my Master
 > http://docs.opencv.org/2.4/doc/tutorials/introduction/linux_install/linux_install.html
 
 4.  Other Dependences (for Ubuntu 12.04 LTS)
-> ** glog **
+
+** glog **
 > wget https://google-glog.googlecode.com/files/glog-0.3.3.tar.gz
 > tar zxvf glog-0.3.3.tar.gz
 > cd glog-0.3.3
 > make && make install
 
-> ** gflags **
+** gflags **
 > wget https://github.com/schuhschuh/gflags/archive/master.zip
 > unzip master.zip
 > cd gflags-master
