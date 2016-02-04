@@ -82,3 +82,6 @@ This repository contains all information, data and source-code used in my Master
 7. Compile
   	- cmake .
   	- make all
+
+#Get the Source
+1. Download the souce files **util.h** and **utilCaffe.h** and put in the Caffe include folder
