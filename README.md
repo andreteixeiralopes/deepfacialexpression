@@ -87,3 +87,7 @@ This repository contains all information, data and source-code used in my Master
 1. Download the souce files **util.h** and **utilCaffe.h** and put in the Caffe include folder
 
 2. Download the source file **trainDeepFace.cpp** and put in the Caffe tools folder.
+
+3. Compile
+  	- cmake .
+  	- make all
