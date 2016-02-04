@@ -88,6 +88,13 @@ This repository contains all information, data and source-code used in my Master
 
 2. Download the source file **trainDeepFace.cpp** and put in the Caffe tools folder.
 
-3. Compile
+3. Download the file **Jaffe.zip** and extract it in the tools folder.
+
+4. Go to Caffe directory
+
+5. Compile
   	- cmake .
   	- make all
+
+5. Run
+	- ./tools/trainDeepFace.cpp
