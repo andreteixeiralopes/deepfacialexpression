@@ -72,7 +72,7 @@ This repository contains all information, data and source-code used in my Master
 	- git clone https://github.com/LMDB/lmdb
 	- cd lmdb/libraries/liblmdb
 	- make && make install
-	
+	 
 5. Download Caffe last version from
   	- https://github.com/BVLC/caffe
 
