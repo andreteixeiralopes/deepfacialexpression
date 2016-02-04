@@ -64,6 +64,7 @@ This repository contains all information, data and source-code used in my Master
 	- cd glog-0.3.3
 	- make && make install
 
+
 **gflags**
 	- wget https://github.com/schuhschuh/gflags/archive/master.zip
 	- unzip master.zip
@@ -71,6 +72,7 @@ This repository contains all information, data and source-code used in my Master
 	- mkdir build && cd build
 	- export CXXFLAGS="-fPIC" && cmake .. && make VERBOSE=1
 	- make && make install
+
 
 **lmdb**
 	- git clone https://github.com/LMDB/lmdb
