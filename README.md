@@ -97,4 +97,4 @@ This repository contains all information, data and source-code used in my Master
   	- make all
 
 5. Run
-	- ./tools/trainDeepFace.cpp
+	- ./tools/trainDeepFace
