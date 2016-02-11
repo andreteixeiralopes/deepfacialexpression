@@ -189,5 +189,3 @@ double testNet(string caffeLayerDefinition, string caffeTrainedLayers, vector<Ma
 
 	return accuracy;
 }
-
-
