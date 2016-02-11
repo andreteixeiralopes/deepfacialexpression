@@ -106,16 +106,22 @@ This repository contains all information, data and source-code used in my Master
 	- make all
 	- ./generateData
 
+5. Copy the files **solver.prototxt**, **train.prototxt** and **test.prototxt** to the same path of the synthetic samples. These files contains the network definitions (layers and others meta-parameters).
+
 #Run Training
-1. Open the file **trainDeepFace.cpp** and change the value of the variable dataFolder to the folder where the synthetic samples are stored.
+1. Open the file **trainDeepFace.cpp** and change the value of the variable dataPath to the folder where the synthetic samples are stored.
 
 2. Run:
 	- make all
 	- ./trainDeepFace
 
 #Run Testing
-1. Open the file **trainDeepFace.cpp** and change the method called in tha Main, to executeTraining().
+1. Create a results folder in your data path (with the name **Results**)
 
-2. Run:
+2. Open the file **trainDeepFace.cpp** and change the method called in tha Main, to test().
+
+3. Run:
 	- make all
 	- ./trainDeepFace
+
+4. Evaluate: Te files with the patter **summary_GT*IT0*.txt** are the best results, selected with the validation group.
