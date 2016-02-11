@@ -5,7 +5,7 @@ test_iter: 10
 test_interval: 100
 
 base_lr: 0.01
-momentum: 0.95
+momentum: 0.9
 weight_decay: 0.015
 
 lr_policy: "inv"
