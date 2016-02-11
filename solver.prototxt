@@ -1,0 +1,22 @@
+net: "train.prototxt"
+
+test_iter: 10
+
+test_interval: 100
+
+base_lr: 0.01
+momentum: 0.95
+weight_decay: 0.015
+
+lr_policy: "inv"
+gamma: 0.0001
+power: 0.75
+
+display: 100
+
+max_iter: 10000
+
+snapshot: 10000
+snapshot_prefix: "facesnet"
+
+solver_mode: GPU
