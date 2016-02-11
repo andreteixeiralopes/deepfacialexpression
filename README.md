@@ -106,3 +106,16 @@ This repository contains all information, data and source-code used in my Master
 	- make all
 	- ./generateData
 
+#Run Training
+1. Open the file **trainDeepFace.cpp** and change the value of the variable dataFolder to the folder where the synthetic samples are stored.
+
+2. Run:
+	- make all
+	- ./trainDeepFace
+
+#Run Testing
+1. Open the file **trainDeepFace.cpp** and change the method called in tha Main, to executeTraining().
+
+2. Run:
+	- make all
+	- ./trainDeepFace
