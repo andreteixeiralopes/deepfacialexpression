@@ -86,9 +86,7 @@ This repository contains all information, data and source-code used in my Master
 #Get the Source
 1. Download the souce files **util.h** and **utilCaffe.h** and put in the Caffe include folder
 
-2. Download the source file **trainDeepFace.cpp** and put in the Caffe tools folder.
-
-3. Download the file **Jaffe.zip** and extract it in the tools folder.
+2. Download the source files **trainDeepFace.cpp** and **generateData.cpp** and put it in the Caffe tools folder.
 
 4. Go to Caffe directory
 
@@ -96,5 +94,15 @@ This repository contains all information, data and source-code used in my Master
   	- cmake .
   	- make all
 
-5. Run
-	- ./tools/trainDeepFace
+#Get the Data
+1. Request your copy of the Cohn-Kanade database from
+	- http://www.consortium.ri.cmu.edu/ckagree/
+
+2. The database needs to be separated in the eigth non-overlap groups, to perform the experiments in the right way. To separate the data, extract the Cohn-Kanade data and create the folders G1 to G8, and put the files in theses folders according to the file **label-original.txt**.
+
+3. To replicate the experiments described in the dissertation the sinthetic samples need to be generated. To perform thism, use the **generateData.cpp** code. In the begining of the file, change the values of the variables **originalDataFolder** and **syntheticDataFolder**, to the folder that contains the orignal data separated in the groups, with the **label-original.txt** file, and to the folder where the synthetic data will be stored (the groups folder, G1 to G8, need to create before the execution of this method).
+
+4. After these operations, run:
+	- make all
+	- ./generateData
+
