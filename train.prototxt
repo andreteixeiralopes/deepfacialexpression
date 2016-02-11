@@ -68,9 +68,38 @@ layers {
   }
 }
 layers {
+  name: "conv2"
+  type: CONVOLUTION
+  bottom: "pool1"
+  top: "conv2"
+  convolution_param {
+    num_output: 64
+    kernel_size: 7
+    pad: 2
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layers {
+  name: "pool2"
+  type: POOLING
+  bottom: "conv2"
+  top: "pool2"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+    pad: 0
+  }
+}
+layers {
   name: "ip1"
   type: INNER_PRODUCT
-  bottom: "pool1"
+  bottom: "pool2"
   top: "ip1"
   blobs_lr: 1
   blobs_lr: 2
