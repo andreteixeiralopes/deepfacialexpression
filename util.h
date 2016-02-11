@@ -41,19 +41,19 @@ using namespace cv;
 
 typedef
 		struct
-		DadosNormalizacao
+		SpatialNormalizationData
 		{
-			float anguloRotacao;
-			float distanciaOlhos;
-			Point2f media;
-		} DadosNormalizacao;
+			float rotationAngle;
+			float eyesDistance;
+			Point2f average;
+		} SpatialNormalizationData;
 
 typedef
 		struct
-		DadosTreino
+		TrainData
 		{
-			int grupoValidacao;
-			int grupoTeste;
+			int validationSet;
+			int testSet;
 			vector<Mat> trainSamples;
 			vector<int> trainLabels;
 			vector<Mat> testSamples;
@@ -61,13 +61,13 @@ typedef
 			vector<Mat> validationSamples;
 			vector<int> validationLabels;
 			map<string, int> IndividuosTeste;
-		} DadosTreino;
+		} TrainData;
 
 void copyFile(string source, string destination);
 void copyFile(char *source, char *dest);
 vector<int> shuffleVectors(vector<Mat>& Samples, vector<int>& Labels);
 
-Mat GerarImagemDiferenca(Mat ImagemBase, Mat Imagem){
+Mat GenerateDifferenceImage(Mat ImagemBase, Mat Imagem){
 	Mat newImg;
 	convertScaleAbs(Imagem, Imagem, 0.5, 128);
 	convertScaleAbs(ImagemBase, ImagemBase, 0.5, 0);
@@ -173,7 +173,7 @@ vector<int> shuffleVectors(vector<Mat>& Samples, vector<int>& Labels)
 	return indexes;
 }
 
-DadosNormalizacao gerarDadosNormalizacao(Point2f pontoMedioOlhoDireito, Point2f pontoMedioOlhoEsquerdo)
+SpatialNormalizationData GenerateSpatialNormalizationData(Point2f pontoMedioOlhoDireito, Point2f pontoMedioOlhoEsquerdo)
 {
 	Point2f pontoMedioOlhos, vetorAngulo;
 
@@ -185,17 +185,17 @@ DadosNormalizacao gerarDadosNormalizacao(Point2f pontoMedioOlhoDireito, Point2f 
 	vetorAngulo.x = pontoMedioOlhoDireito.x - pontoMedioOlhos.x;
 	vetorAngulo.y = pontoMedioOlhoDireito.y - pontoMedioOlhos.y;
 
-	DadosNormalizacao resultado;
-	resultado.anguloRotacao = atan2(vetorAngulo.y, vetorAngulo.x);
-	resultado.media = Point2f(pontoMedioOlhos.x, pontoMedioOlhos.y);
-	resultado.distanciaOlhos = sqrt(pow(vetorAngulo.x, 2) + pow(vetorAngulo.y, 2));
+	SpatialNormalizationData resultado;
+	resultado.rotationAngle = atan2(vetorAngulo.y, vetorAngulo.x);
+	resultado.average = Point2f(pontoMedioOlhos.x, pontoMedioOlhos.y);
+	resultado.eyesDistance = sqrt(pow(vetorAngulo.x, 2) + pow(vetorAngulo.y, 2));
 
 	return resultado;
 }
 
-Mat normalizarImagem(Mat Img, DadosNormalizacao dadosNormalizacao)
+Mat SpatialNormalizeImage(Mat Img, SpatialNormalizationData dadosNormalizacao)
 {
-	Mat rotationMatix = getRotationMatrix2D(Point(round(dadosNormalizacao.media.x), round(dadosNormalizacao.media.y)), dadosNormalizacao.anguloRotacao*180.0 / 3.141516, 1.0);
+	Mat rotationMatix = getRotationMatrix2D(Point(round(dadosNormalizacao.average.x), round(dadosNormalizacao.average.y)), dadosNormalizacao.rotationAngle*180.0 / 3.141516, 1.0);
 
 	int newSize = max(Img.cols, Img.rows);
 	Mat newImg = Mat::zeros(Size(newSize, newSize), CV_8UC1);
@@ -203,12 +203,11 @@ Mat normalizarImagem(Mat Img, DadosNormalizacao dadosNormalizacao)
 	warpAffine(Img, newImg, rotationMatix, Size(newSize, newSize));
 //	resize(Img, newImg, Size(newSize, newSize));
 	Mat croppedImg = newImg(
-							Range(dadosNormalizacao.media.y - dadosNormalizacao.distanciaOlhos * YXMin,
-								  dadosNormalizacao.media.y + dadosNormalizacao.distanciaOlhos * YXMax),
-						    Range(dadosNormalizacao.media.x - dadosNormalizacao.distanciaOlhos * XXMin,
-						    	  dadosNormalizacao.media.x + dadosNormalizacao.distanciaOlhos * XXMax));
+							Range(dadosNormalizacao.average.y - dadosNormalizacao.eyesDistance * YXMin,
+								  dadosNormalizacao.average.y + dadosNormalizacao.eyesDistance * YXMax),
+						    Range(dadosNormalizacao.average.x - dadosNormalizacao.eyesDistance * XXMin,
+						    	  dadosNormalizacao.average.x + dadosNormalizacao.eyesDistance * XXMax));
 
-//	Mat croppedImg = newImg;
 	resize(croppedImg, croppedImg, Size(32, 32));
 	return croppedImg;
 }
@@ -243,7 +242,7 @@ double stdDev(Mat Img, Mat Mean, Point2f Center, int kSize)
 
 }
 
-Mat equalizar(Mat Img)
+Mat IntensityNormalization(Mat Img)
 {
     int kSize = 7;
     //int kSize = 29;
@@ -291,10 +290,6 @@ Mat equalizar(Mat Img)
     return newImg;
 }
 
-void cleanMatrix(int** mtz, int rows, int cols){
-
-}
-
 void trunkVectors(vector<Mat>& Imgs, vector<int>& Labels, int TrunkSize){
 	while(Imgs.size() > TrunkSize){
 		Imgs.erase(Imgs.begin());
@@ -314,23 +309,21 @@ int getClassCK(int i)
 	return --i;
 }
 
-vector<Point2f> lerPontosLandmarkCohnKanade(string landmark)
+vector<Point2f> ReadCohnKanadeLandmarkPoints(string LandmarksFile)
 {
-        FILE* dadosImagem = fopen(landmark.c_str(), "r");
+        FILE* fileData = fopen(LandmarksFile.c_str(), "r");
         float x, y;
         vector<Point2f> points;
-        while (!feof(dadosImagem)){
-                fscanf(dadosImagem, "%f %f\r\n", &x, &y);
+        while (!feof(fileData)){
+                fscanf(fileData, "%f %f\r\n", &x, &y);
                 points.push_back(Point2f((int)x, (int)y));
-                //points.push_back(Point2f((int)x*0.3, (int)y*0.3));
-        //      cout << (int)x*0.3 << ", " << (int)y*0.3 << endl;
         }
-        fclose(dadosImagem);
+        fclose(fileData);
 
         return points;
 }
 
-DadosNormalizacao normalizarPontos(vector<Point2f>& lstPontos, Point2f RuidoOlhoDireito, Point2f RuidoOlhoEsquerdo)
+SpatialNormalizationData NormalizeFacialPoints(vector<Point2f>& lstPontos, Point2f RuidoOlhoDireito, Point2f RuidoOlhoEsquerdo)
 {
         Point2f pontoMedioOlhoEsquerdo, pontoMedioOlhoDireito, pontoMedioOlhos, vetorAngulo;
 
@@ -359,7 +352,8 @@ DadosNormalizacao normalizarPontos(vector<Point2f>& lstPontos, Point2f RuidoOlho
         //Adiciona o Ruido
         pontoMedioOlhoDireito.x += RuidoOlhoDireito.x;
         pontoMedioOlhoDireito.y += RuidoOlhoDireito.y;
-//Calcula o ponto médio dos dois olhos
+
+        //Calcula o ponto médio dos dois olhos
         pontoMedioOlhos.x = (pontoMedioOlhoDireito.x + pontoMedioOlhoEsquerdo.x) / 2;
         pontoMedioOlhos.y = (pontoMedioOlhoDireito.y + pontoMedioOlhoEsquerdo.y) / 2;
 
@@ -367,25 +361,22 @@ DadosNormalizacao normalizarPontos(vector<Point2f>& lstPontos, Point2f RuidoOlho
         vetorAngulo.x = pontoMedioOlhoDireito.x - pontoMedioOlhos.x;
         vetorAngulo.y = pontoMedioOlhoDireito.y - pontoMedioOlhos.y;
 
-        DadosNormalizacao resultado;
-        resultado.anguloRotacao = atan2(vetorAngulo.y, vetorAngulo.x);
-        resultado.media = Point2f(pontoMedioOlhos.x, pontoMedioOlhos.y);
-        resultado.distanciaOlhos = sqrt(pow(vetorAngulo.x, 2) + pow(vetorAngulo.y, 2));
+        SpatialNormalizationData resultado;
+        resultado.rotationAngle = atan2(vetorAngulo.y, vetorAngulo.x);
+        resultado.average = Point2f(pontoMedioOlhos.x, pontoMedioOlhos.y);
+        resultado.eyesDistance = sqrt(pow(vetorAngulo.x, 2) + pow(vetorAngulo.y, 2));
 
         return resultado;
 }
 
 
-Mat normalizarArquivo(string caminhoArquivo, Point2f RuidoOlhoDireito, Point2f RuidoOlhoEsquerdo)
+Mat NormalizeImageFile(string caminhoArquivo, Point2f RuidoOlhoDireito, Point2f RuidoOlhoEsquerdo)
 {
-        vector<Point2f> pontosImg = lerPontosLandmarkCohnKanade(caminhoArquivo.substr(0, caminhoArquivo.size() - 4).append("_landmarks.txt"));
-//        vector<Point2f> pontosImg = lerPontosLandmarkCohnKanade(caminhoArquivo.append(".txt"));
+        vector<Point2f> pontosImg = ReadCohnKanadeLandmarkPoints(caminhoArquivo.substr(0, caminhoArquivo.size() - 4).append("_landmarks.txt"));
 
-        DadosNormalizacao resultadoNormalizacao = normalizarPontos(pontosImg, RuidoOlhoDireito, RuidoOlhoEsquerdo);
-//cout << caminhoArquivo << endl;
-        return normalizarImagem(imread(caminhoArquivo, 0), resultadoNormalizacao);
+        SpatialNormalizationData resultadoNormalizacao = NormalizeFacialPoints(pontosImg, RuidoOlhoDireito, RuidoOlhoEsquerdo);
 
-        //return normalizarImagem(imread(caminhoArquivo.substr(0, caminhoArquivo.size()-4), 0), resultadoNormalizacao);
+        return SpatialNormalizeImage(imread(caminhoArquivo, 0), resultadoNormalizacao);
 }
 
 
