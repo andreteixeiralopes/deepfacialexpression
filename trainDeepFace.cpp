@@ -1,15 +1,22 @@
+/*
+ * trainDeepFace.cpp
+ *
+ *  Created on: Feb 11, 2016
+ *      Author: alopes
+ */
+
 #include "util.h"
 #include "utilCaffe.h"
 
 /*
- * 19/11/2015 - No treinamento Ã© escolhida a Ã©poca que deu o melhor resultado. Por isso
- * a necessidade de separamos os dados tem trÃªs grupos, treino, validaÃ§Ã£o e teste. O dado
- * de teste Ã© utilizado somente para avaliar a rede, apÃ³s todo o treinamento, que inclusive usa
- * a validaÃ§Ã£o para determinar a melhor rede e Ã©poca.
+ * 19/11/2015 - No treinamento é escolhida a época que deu o melhor resultado. Por isso
+ * a necessidade de separamos os dados tem três grupos, treino, validação e teste. O dado
+ * de teste é utilizado somente para avaliar a rede, após todo o treinamento, que inclusive usa
+ * a validação para determinar a melhor rede e época.
 */
 
-int qtdeExpressoes = 7;
-int qtdeGrupos = 10;
+int qtdeExpressoes = 6;
+int qtdeGrupos = 8;
 int qtdeIteracoes = 10;
 
 string dataPath = "/dados/alopes/faces/sibgrapi-si/db-jaffe/";
@@ -31,14 +38,7 @@ int getClassCKJ(int i){
 		return i;
 }
 
-int getClassJaffe(int i){
-	if(qtdeExpressoes == 6)
-		return --i;
-	else
-		return i;
-}
-
-void lerDadosTreino(DadosTreino* dadosTreino)
+void readTrainData(TrainData* dadosTreino)
 {
 	char filename[100], charGrupo;
 	int expressao, grupo;
@@ -48,18 +48,15 @@ void lerDadosTreino(DadosTreino* dadosTreino)
 
 	while(!feof(f)){
 		fscanf(f, "%c%d%s %d\n", &charGrupo, &grupo, filename, &expressao);
-//		cout << filename << endl;
 		if(expressao > 0 || qtdeExpressoes == 7){
 			stringstream ss;
 			ss << dataPath << "G" << grupo << filename;
-//			cout << ss.str() << endl;
-//			fileImg = imread(ss.str(), 0);
-//			cout << "1" << endl;
-			if(grupo == dadosTreino->grupoTeste){
+
+			if(grupo == dadosTreino->testSet){
 				if(isOriginal(string(filename))){
 					fileImg = imread(ss.str(),0);
 					dadosTreino->testSamples.push_back(fileImg);
-					dadosTreino->testLabels.push_back(getClassJaffe(expressao));
+					dadosTreino->testLabels.push_back(getClassCKJ(expressao));
 					string individuo(filename);
 					individuo = individuo.substr(1, 4);
 					if(dadosTreino->IndividuosTeste.find(individuo) == dadosTreino->IndividuosTeste.end())
@@ -69,22 +66,16 @@ void lerDadosTreino(DadosTreino* dadosTreino)
 					dadosTreino->IndividuosTeste[individuo]++;
 				}
 			}
-			else if(grupo == dadosTreino->grupoValidacao){
-				/* -- VERIFICAR SE Ã‰ MELHOR COLOCAR OU NÃƒO OS SINTÃ‰TICOS NO GRUPO DE VALIDAÃ‡ÃƒO --*/
+			else if(grupo == dadosTreino->validationSet){
 				if(isOriginal(string(filename))){
 					dadosTreino->validationSamples.push_back(fileImg);
-					dadosTreino->validationLabels.push_back(getClassJaffe(expressao));
-				}
-			}
-			else{
-				if(fileImg.rows > 0){
-	//				dadosTreino->trainSamples.push_back(fileImg);
-	//				dadosTreino->trainLabels.push_back(getClassJaffe(expressao));
+					dadosTreino->validationLabels.push_back(getClassCKJ(expressao));
 				}
 			}
 		}
 	}
 	fclose(f);
+
 	//Faz com que o conjunto seja divisivel pelo tamanho do batch
 	shuffleVectors(dadosTreino->validationSamples, dadosTreino->validationLabels);
 	while(dadosTreino->validationSamples.size() % 20 != 0){
@@ -162,58 +153,26 @@ void separarIndividuo(
 }
 
 /*
-	Teste do treinamento do JAFFE usando somente treino e teste. Um dos motivos e o BD ser pequeno. 
-	O outro eh que o resultado na outra metodologia nao foi muito satisfatorio. Neste caso foi tirado
-	a selecao da melhor epoca durante o treinamento.
-*/
-void rodarExperimentoJaffe(){
-	string solver = dataPath + "solver.prototxt";
-        string resultsPath = dataPath + "Results-Average2/";
-
-        for(int grupoTeste = 1; grupoTeste <= qtdeGrupos; grupoTeste++){
-        	DadosTreino dadosTreino;
-                dadosTreino.grupoTeste = grupoTeste;
-                dadosTreino.grupoValidacao = 99;
-                lerDadosTreino(&dadosTreino);
- 		while(dadosTreino.testSamples.size() % 10 != 0){
-                        dadosTreino.testSamples.erase(dadosTreino.testSamples.begin());
-                	dadosTreino.testLabels.erase(dadosTreino.testLabels.begin());
-                }
-
-		DadosTreino dadosTeste;
-		dadosTeste.grupoTeste = grupoTeste;
-		dadosTeste.grupoValidacao = 99;
-		lerDadosTreino(&dadosTeste);
-
-                for(int iter = 1; iter <= qtdeIteracoes; iter++){
-                	shuffleVectors(dadosTreino.trainSamples, dadosTreino.trainLabels);
-                        trainNet(solver, dadosTreino.trainSamples, dadosTreino.trainLabels, dadosTreino.testSamples, dadosTreino.testLabels);
-                        executarTeste(resultsPath, grupoTeste, grupoTeste, iter, dadosTeste.testSamples, dadosTeste.testLabels, -1, "facesnet_iter_10000.caffemodel");
-                }
-        }
-}
-
-/*
 	Experimento usando 7 grupos para treino, 1 grupo para validacao e teste. Este ultimo eh dividido
 	em dois grupos, um com (n - 1) individuos para validacao e (1) individuo para teste.
 */
-void rodarExperimentoDoisGrupos(){
+void train(){
 	string solver = dataPath + "solver.prototxt";
-	string resultsPath = dataPath + "sibgrapi7/";
+	string resultsPath = dataPath + "Results/";
 
 	for(int grupoTeste = 1; grupoTeste <= qtdeGrupos; grupoTeste++){
-		DadosTreino dadosTreino;
-		dadosTreino.grupoTeste = grupoTeste;
+		TrainData dadosTreino;
+		dadosTreino.testSet = grupoTeste;
 		//Garante que so vai separar em treino e teste, nao vai ter validacao
-		dadosTreino.grupoValidacao = 99;
-		lerDadosTreino(&dadosTreino);
+		dadosTreino.validationSet = 99;
+		readTrainData(&dadosTreino);
 		for(int individuo = 1; individuo <= dadosTreino.IndividuosTeste.size(); individuo++){
 			double bstValidationAccuracy = 0, mediaNormal = 0, mediaBinario = 0;
 			vector<Mat> imagensValidacao, imagensTeste;
 			vector<int> labelsValidacao, labelsTeste;
-			separarIndividuo(dadosTreino.testSamples, dadosTreino.testLabels, 
-					  individuo - 1, imagensValidacao, 
-					  labelsValidacao, imagensTeste, 
+			separarIndividuo(dadosTreino.testSamples, dadosTreino.testLabels,
+					  individuo - 1, imagensValidacao,
+					  labelsValidacao, imagensTeste,
 					  labelsTeste, dadosTreino.IndividuosTeste);
 			//Embaralha e trunca os dados de validacao
 			shuffleVectors(imagensValidacao, labelsValidacao);
@@ -231,185 +190,22 @@ void rodarExperimentoDoisGrupos(){
 	}
 }
 
-/*void rodarExperimentoCrossBank(){
-	string solver = dataPath + "solver.prototxt";
-
-	dataPath = "/dados/alopes/faces/JAFFE/Sinteticos-Grupos/";
-	DadosTreino dadosOutroBd;
-	dadosOutroBd.grupoTeste = 99;
-	for(int i = 1; i <= 10; i++){
-		dadosOutroBd.grupoTeste = i;
-		lerDadosTreino(&dadosOutroBd);
-		while(dadosOutroBd.trainSamples.size() > 0){
-			dadosOutroBd.trainSamples.erase(dadosOutroBd.trainSamples.begin());
-			dadosOutroBd.trainLabels.erase(dadosOutroBd.trainLabels.begin());
-		}
-	}
-
-	dataPath = "/dados/alopes/faces/CK/Sinteticos-Grupos/";
-	string resultsPath = dataPath + "Results-Cross-Jaffe/";
-
-        for(int grupoTeste = 1; grupoTeste <= qtdeGrupos; grupoTeste++){
-                DadosTreino dadosTreino;
-                dadosTreino.grupoTeste = grupoTeste;
-                dadosTreino.grupoValidacao = 99;
-                lerDadosTreino(&dadosTreino);
-                while(dadosTreino.testSamples.size() % 20 != 0){
-                        dadosTreino.testSamples.erase(dadosTreino.testSamples.begin());
-                        dadosTreino.testLabels.erase(dadosTreino.testLabels.begin());
-                }
-
-                DadosTreino dadosTeste;
-                dadosTeste.grupoTeste = grupoTeste;
-                dadosTeste.grupoValidacao = 99;
-                lerDadosTreino(&dadosTeste);
-		double bstValidation = 0;
-                for(int iter = 1; iter <= qtdeIteracoes; iter++){
-                        shuffleVectors(dadosTreino.trainSamples, dadosTreino.trainLabels);
-                        trainNet(solver, dadosTreino.trainSamples, dadosTreino.trainLabels, dadosTreino.testSamples, dadosTreino.testLabels);
-			double validation =  testNet(dataPath + "test.prototxt", defaultNetFile, dadosTeste.testSamples, dadosTeste.testLabels, NULL, dataPath + "solver.prototxt");
-			if(validation > bstValidation){
-	                        executarTeste(resultsPath, grupoTeste, grupoTeste, 0, dadosOutroBd.testSamples, dadosOutroBd.testLabels, -1);
-			}
-                }
-        }
-}*/
-
-void rodarExperimentoCrossBank(){
-	FILE *redes = fopen("/home/likewise-open/LCAD/alopes/Resultados/subtracao7/redes.txt","r");
-
-	dataPath = "/dados/alopes/faces/JAFFE/Sinteticos-Grupos/";
-        DadosTreino dadosOutroBd;
-        dadosOutroBd.grupoTeste = 99;
-        for(int i = 1; i <= 10; i++){
-                dadosOutroBd.grupoTeste = i;
-                lerDadosTreino(&dadosOutroBd);
-                while(dadosOutroBd.trainSamples.size() > 0){
-                        dadosOutroBd.trainSamples.erase(dadosOutroBd.trainSamples.begin());
-                        dadosOutroBd.trainLabels.erase(dadosOutroBd.trainLabels.begin());
-                }
-//		cout << "G" << i <<  endl;
-        }
-
-
-	int i = 1;
-	while(!feof(redes)){
-		char rede[100];
-		fscanf(redes, "%s", rede);
-		stringstream ss;
-		ss << "/home/likewise-open/LCAD/alopes/Resultados/subtracao7/";
-		ss << rede;
-
-		executarTeste("/home/likewise-open/LCAD/alopes/Resultados/subtracao-cross-jaffe7/", 0, 0, i, dadosOutroBd.testSamples, dadosOutroBd.testLabels, -1, ss.str());
-		i++;
-	}
-}
-
-
-
-/*
-	Experimento Usando 6 grupos para treino, 1 para validacao e 1 para teste.
-	Esse teste pode ser realizado de duas formas:
-	1. 	Usando o grupo de validacao para determinar a melhor epoca durante o treino. 
-		E testar todas as 10 rodadas no grupo de teste.
-	2. 	Usando o grupo de validacao para determinar a melhor epoca e a melhor das 10 rodadas.
-		E testar somente a melhor rodada no grupo de teste.
-*/
-void rodarExperimentoTresGrupos(){
-	string solver = dataPath + "solver.prototxt";
-	string resultsPath = dataPath + "sibgrapi-sintetico-sem-equalizacao/";
-
-	for(int grupoTeste = 1; grupoTeste <= 1; grupoTeste++){
-//		for(int grupoValidacao = 1; grupoValidacao <= qtdeGrupos; grupoValidacao++){
-//			if(grupoValidacao != grupoTeste){
-				DadosTreino dadosTreino;
-				dadosTreino.grupoTeste = grupoTeste;
-				dadosTreino.grupoValidacao = 99;
-				lerDadosTreino(&dadosTreino);
-				 while(dadosTreino.testSamples.size() % 10 != 0){
-			                dadosTreino.testSamples.erase(dadosTreino.testSamples.begin());
-			                dadosTreino.testLabels.erase(dadosTreino.testLabels.begin());
-			        }
-//	cout << dadosTreino.testSamples.size() << " - " << dadosTreino.trainSamples.size() << endl;
-//getchar();
-
-				for(int iter = 1; iter <= 1; iter++){
-//					shuffleVectors(dadosTreino.trainSamples, dadosTreino.trainLabels);
-					trainNet(solver, dadosTreino.trainSamples, dadosTreino.trainLabels, dadosTreino.testSamples, dadosTreino.testLabels);
-					executarTeste(resultsPath, grupoTeste, grupoTeste, iter, dadosTreino.testSamples, dadosTreino.testLabels);
-				}
-			}
-//		}
-//	}
-}
-
-void encontrarMelhorRedeGrupo(string resultsPath){
-        string solver = dataPath + "solver.prototxt";
-
-    for(int grupoTeste = 1; grupoTeste <= qtdeGrupos; grupoTeste++){
-                for(int grupoValidacao = 1; grupoValidacao <= qtdeGrupos; grupoValidacao++){
-                        if(grupoValidacao != grupoTeste){
-                                double bstValidationAccuracy = 0;
-                                DadosTreino dadosTreino;
-                  
-        dadosTreino.grupoTeste = grupoTeste;
-                                dadosTreino.grupoValidacao = grupoValidacao;
-                                lerDadosTreino(&dadosTreino);
-                                for(int iter = 1; iter <= qtdeIteracoes; iter++){
-                                        stringstream ss;
-                                        ss << resultsPath << "summary_GT" << grupoTeste << "_GV" << grupoValidacao << "_IT" << iter << ".net";
-                                        double validationAccuracy = testNet(dataPath + "test.prototxt", ss.str(), dadosTreino.validationSamples, dadosTreino.validationLabels, NULL, solver);
-                                        if(validationAccuracy > bstValidationAccuracy){
-                                                bstValidationAccuracy = validationAccuracy;
-                                                executarTeste(resultsPath, grupoTeste, grupoValidacao, 0, dadosTreino.testSamples, dadosTreino.testLabels, -1 ,ss.str());
-                                        }
-                                }
-                        }
-                }
-        }
-}
-
-void testarTodasRedes(string resultsPath){
-    string solver = dataPath + "solver.prototxt";
-
-    for(int grupoTeste = 1; grupoTeste <= qtdeGrupos; grupoTeste++){
-		for(int grupoValidacao = 1; grupoValidacao <= qtdeGrupos; grupoValidacao++){
-			if(grupoValidacao != grupoTeste){
-				double bstValidationAccuracy = 0;
-				DadosTreino dadosTreino;
-				dadosTreino.grupoTeste = grupoTeste;
-				dadosTreino.grupoValidacao = grupoValidacao;
-				lerDadosTreino(&dadosTreino);
-				for(int iter = 1; iter <= qtdeIteracoes; iter++){
-					stringstream ss;
-					ss << resultsPath << "summary_GT" << grupoTeste << "_GV" << grupoValidacao << "_IT" << iter << ".net";
-					//double validationAccuracy = testNet(dataPath + "test.prototxt", ss.str(), dadosTreino.validationSamples, dadosTreino.validationLabels, NULL, solver);
-					//if(validationAccuracy > bstValidationAccuracy){
-					//	bstValidationAccuracy = validationAccuracy;
-						executarTeste(resultsPath, grupoTeste, grupoValidacao, iter, dadosTreino.testSamples, dadosTreino.testLabels, -1 ,ss.str());
-				//	}
-				}
-			}
-		}
-	}
-}
-
-void encontrarMelhorRedeIndividuo(string resultsPath){
+void test(string resultsPath = "Results"){
 	string solver = dataPath + "solver.prototxt";
 
 	for(int grupoTeste = 1; grupoTeste <= 8; grupoTeste++){
-		DadosTreino dadosTreino;
-		dadosTreino.grupoTeste = grupoTeste;
+		TrainData dadosTreino;
+		dadosTreino.testSet = grupoTeste;
 		//Garante que so vai separar em treino e teste, nai vai ter validacao
-		dadosTreino.grupoValidacao = 99;
-		lerDadosTreino(&dadosTreino);
+		dadosTreino.validationSet = 99;
+		readTrainData(&dadosTreino);
 		for(int individuo = 1; individuo <= dadosTreino.IndividuosTeste.size(); individuo++){
 			double bstValidationAccuracy = 0;
 			vector<Mat> imagensValidacao, imagensTeste;
 			vector<int> labelsValidacao, labelsTeste;
-			separarIndividuo(dadosTreino.testSamples, dadosTreino.testLabels, 
-					  individuo - 1, imagensValidacao, 
-					  labelsValidacao, imagensTeste, 
+			separarIndividuo(dadosTreino.testSamples, dadosTreino.testLabels,
+					  individuo - 1, imagensValidacao,
+					  labelsValidacao, imagensTeste,
 					  labelsTeste, dadosTreino.IndividuosTeste);
 			//Embaralha e trunca os dados de validacao
 			shuffleVectors(imagensValidacao, labelsValidacao);
@@ -421,18 +217,14 @@ void encontrarMelhorRedeIndividuo(string resultsPath){
 
 				if(validationAccuracy > bstValidationAccuracy){
 					bstValidationAccuracy = validationAccuracy;
-					executarTeste(resultsPath, grupoTeste, grupoTeste, 0, imagensTeste, labelsTeste, individuo, "/home/likewise-open/LCAD/alopes/Resultados/sibgrapi7/summary_GT8_GV8_IT9_IND14.net");
-				}				
+					executarTeste(resultsPath, grupoTeste, grupoTeste, 0, imagensTeste, labelsTeste, individuo);
+				}
 			}
 		}
 	}
 }
 
 int main(){
-//	encontrarMelhorRedeIndividuo("/home/likewise-open/LCAD/alopes/Resultados/sibgrapi7/");
-	//encontrarMelhorRedeGrupo(dataPath + "subtracao7/");
-//	rodarExperimentoDoisGrupos();
-//	rodarExperimentoTresGrupos();
-	rodarExperimentoCrossBank();
-	//rodarExperimentoJaffe();
+	train();
+	//test();
 }
