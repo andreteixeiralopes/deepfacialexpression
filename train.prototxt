@@ -1,0 +1,123 @@
+name: "FacesNet"
+layers {
+  name: "faces"
+  type: MEMORY_DATA
+  top: "data"
+  top: "label"
+  memory_data_param {
+   batch_size: 50
+   channels: 1
+   height: 32
+   width: 32
+  }
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    scale: 0.00390625
+  }
+}
+
+layers {
+  name: "faces"
+  type: MEMORY_DATA
+  top: "data"
+  top: "label"
+  memory_data_param {
+   batch_size: 20
+   channels: 1
+   height: 32
+   width: 32
+  }
+  include {
+    phase: TEST
+  }
+  transform_param {
+    scale: 0.00390625
+  }
+}
+
+layers {
+  name: "conv1"
+  type: CONVOLUTION
+  bottom: "data"
+  top: "conv1"
+  blobs_lr: 1
+  blobs_lr: 2
+  convolution_param {
+    num_output: 32
+    kernel_size: 5
+    pad: 0
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layers {
+  name: "pool1"
+  type: POOLING
+  bottom: "conv1"
+  top: "pool1"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+  }
+}
+layers {
+  name: "ip1"
+  type: INNER_PRODUCT
+  bottom: "pool1"
+  top: "ip1"
+  blobs_lr: 1
+  blobs_lr: 2
+  inner_product_param {
+    num_output: 256
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layers {
+  name: "relu1"
+  type: RELU
+  bottom: "ip1"
+  top: "ip1"
+}
+layers {
+  name: "ip2"
+  type: INNER_PRODUCT
+  bottom: "ip1"
+  top: "ip2"
+  blobs_lr: 1
+  blobs_lr: 2
+  inner_product_param {
+    num_output: 7
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layers {
+  name: "accuracy"
+  type: ACCURACY
+  bottom: "ip2"
+  bottom: "label"
+  top: "accuracy"
+}
+layers {
+  name: "loss"
+  type: SOFTMAX_LOSS
+  bottom: "ip2"
+  bottom: "label"
+  top: "loss"
+}
