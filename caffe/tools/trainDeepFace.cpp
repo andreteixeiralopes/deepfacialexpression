@@ -19,7 +19,7 @@ int qtdeExpressoes = 6;
 int qtdeGrupos = 8;
 int qtdeIteracoes = 10;
 
-string dataPath = "../../data/synthetic/";
+string dataPath = "../data/synthetic/";
 string defaultNetFile = "bstNetwork";
 
 bool isOriginal(string fileName){
