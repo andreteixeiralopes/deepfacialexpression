@@ -95,7 +95,7 @@ void GenerateIntensityNormalizedDatabase(){
 	FILE *labelFile = fopen((originalDataFolder + "label.txt").c_str(),"r");
 	FILE *labelOutput = fopen((syntheticDataFolder + "label.txt").c_str(), "w");
 	int gaussianSize = 3;
-	int maxSamples = 30;
+	int maxSamples = 70;
 	while(!feof(labelFile)){
 		//Informações sobre o arquivo atual
 		char lineCharacters[50], aux;
@@ -127,7 +127,7 @@ void GenerateIntensityNormalizedDatabase(){
 void GenerateNeutralSubtractedDatabase(int GaussianSize){
 	//Parâmetros para geração dos exemplos sintéticos
 	double gaussianSize = GaussianSize;
-	int maxSamples = 50; // 16 + 1
+	int maxSamples = 70; // 16 + 1
 
 	//Arquivos de entrada e saída, respectivamente
 	FILE *labelFile = fopen((originalDataFolder + "label.txt").c_str(),"r");
