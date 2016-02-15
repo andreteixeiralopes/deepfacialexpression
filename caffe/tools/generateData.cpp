@@ -112,9 +112,9 @@ void GenerateIntensityNormalizedDatabase(){
 		Mat original = imread(FullPath.str(), 0);
 		cout << "G" << group << line << endl;
 		for(int i = 0; i < maxSamples; i++){
-			Mat img = NormalizeImageFile(FullPath.str(),
+			Mat img = IntensityNormalization(NormalizeImageFile(FullPath.str(),
 									Point2f(generateNoise(gaussianSize, i), generateNoise(gaussianSize, i)),
-									Point2f(generateNoise(gaussianSize, i), generateNoise(gaussianSize, i)));
+									Point2f(generateNoise(gaussianSize, i), generateNoise(gaussianSize, i))));
 
 			string label = saveSample(Sample(FullPath.str(), group, fileClass, line.substr(1, line.size()-5)), img, syntheticDataFolder, i);
 			fprintf(labelOutput, "%s", label.c_str());
