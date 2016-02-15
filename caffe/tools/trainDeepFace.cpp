@@ -51,10 +51,9 @@ void readTrainData(TrainData* dadosTreino)
 		if(expressao > 0 || qtdeExpressoes == 7){
 			stringstream ss;
 			ss << dataPath << "G" << grupo << filename;
-
+			fileImg = imread(ss.str(),0);
 			if(grupo == dadosTreino->testSet){
 				if(isOriginal(string(filename))){
-					fileImg = imread(ss.str(),0);
 					dadosTreino->testSamples.push_back(fileImg);
 					dadosTreino->testLabels.push_back(getClassCKJ(expressao));
 					string individuo(filename);
@@ -82,15 +81,7 @@ void readTrainData(TrainData* dadosTreino)
 	}
 	fclose(f);
 
-	//Faz com que o conjunto seja divisivel pelo tamanho do batch
-	shuffleVectors(dadosTreino->validationSamples, dadosTreino->validationLabels);
-	while(dadosTreino->validationSamples.size() % 20 != 0){
-		dadosTreino->validationSamples.erase(dadosTreino->validationSamples.begin());
-		dadosTreino->validationLabels.erase(dadosTreino->validationLabels.begin());
-	}
-
-	shuffleVectors(dadosTreino->trainSamples, dadosTreino->trainLabels);
-	while(dadosTreino->trainSamples.size() % 50 != 0){
+	while(dadosTreino->trainSamples.size() % 20 != 0){
 		dadosTreino->trainSamples.erase(dadosTreino->trainSamples.begin());
 		dadosTreino->trainLabels.erase(dadosTreino->trainLabels.begin());
 	}
@@ -182,7 +173,7 @@ void train(){
 					  labelsTeste, dadosTreino.IndividuosTeste);
 			//Embaralha e trunca os dados de validacao
 			shuffleVectors(imagensValidacao, labelsValidacao);
-			while(imagensValidacao.size() % 20 != 0){
+			while(imagensValidacao.size() % 55 != 0){
 				imagensValidacao.erase(imagensValidacao.begin());
 				labelsValidacao.erase(labelsValidacao.begin());
 			}
