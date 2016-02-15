@@ -19,7 +19,7 @@ int qtdeExpressoes = 6;
 int qtdeGrupos = 8;
 int qtdeIteracoes = 10;
 
-string dataPath = "/dados/alopes/faces/sibgrapi-si/db-jaffe/";
+string dataPath = "../../data/synthetic/";
 string defaultNetFile = "bstNetwork";
 
 bool isOriginal(string fileName){
@@ -158,7 +158,7 @@ void separarIndividuo(
 */
 void train(){
 	string solver = dataPath + "solver.prototxt";
-	string resultsPath = dataPath + "Results/";
+	string resultsPath = dataPath + "results/";
 
 	for(int grupoTeste = 1; grupoTeste <= qtdeGrupos; grupoTeste++){
 		TrainData dadosTreino;
@@ -190,7 +190,7 @@ void train(){
 	}
 }
 
-void test(string resultsPath = "Results"){
+void test(string resultsPath = "results"){
 	string solver = dataPath + "solver.prototxt";
 
 	for(int grupoTeste = 1; grupoTeste <= 8; grupoTeste++){
