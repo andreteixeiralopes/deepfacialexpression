@@ -88,7 +88,7 @@ This repository contains all information, data and source-code used in my Master
 1. Request your copy of the Cohn-Kanade database from
 	- http://www.consortium.ri.cmu.edu/ckagree/
 
-2. The database needs to be separated in the eigth non-overlap groups, to perform the experiments in the right way. To separate the data, extract the Cohn-Kanade data to the folders G1 to G8, put the files in theses folders according to the file **label-original.txt**.
+2. The database needs to be separated in the eigth non-overlap groups, to perform the experiments in the right way. To separate the data, extract the Cohn-Kanade data to the folders G1 to G8, put the files in theses folders according to the file **label.txt**.
 
 3. To replicate the experiments described in the dissertation the sinthetic samples need to be generated. To perform this, use the **generateData.cpp** code, stored in the tools folder.
 
