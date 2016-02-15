@@ -96,7 +96,7 @@ This repository contains all information, data and source-code used in my Master
 	- make all
 	- ./tools/generateData
 
-5. Copy the files **solver.prototxt**, **train.prototxt** and **test.prototxt** to the same path of the synthetic samples. These files contains the network definitions (layers and others meta-parameters).
+5. Open the file data/synthetic/solver.prototxt and change the firts line, the path to the file **train.prototxt** should contains the absolute path to the file (the file is in the same folder as the solver.prototxt).
 
 #Run Training
 1. The training source-code is stored in the file **trainDeepFace.cpp**, inside the tools folder.
