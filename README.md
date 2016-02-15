@@ -73,55 +73,44 @@ This repository contains all information, data and source-code used in my Master
 	- cd lmdb/libraries/liblmdb
 	- make && make install
 	 
-5. Download Caffe last version from
-  	- https://github.com/BVLC/caffe
-
-6. Goto the caffe source folder and type
-  	- cp Makefile.config.example Makefile.config
-
-7. Compile
-  	- cmake .
-  	- make all
-
 #Get the Source
-1. Download the souce files **util.h** and **utilCaffe.h** and put in the Caffe include folder
+1. Download the **caffe** and **data** directories from this repository. After the download, the directories showld be in the same parent directory.
 
-2. Download the source files **trainDeepFace.cpp** and **generateData.cpp** and put it in the Caffe tools folder.
+2. Go to caffe directory
 
-4. Go to Caffe directory
-
-5. Compile
+3. Compile
   	- cmake .
   	- make all
+
+4. Everything showld compile without errors.
 
 #Get the Data
 1. Request your copy of the Cohn-Kanade database from
 	- http://www.consortium.ri.cmu.edu/ckagree/
 
-2. The database needs to be separated in the eigth non-overlap groups, to perform the experiments in the right way. To separate the data, extract the Cohn-Kanade data and create the folders G1 to G8, and put the files in theses folders according to the file **label-original.txt**.
+2. The database needs to be separated in the eigth non-overlap groups, to perform the experiments in the right way. To separate the data, extract the Cohn-Kanade data to the folders G1 to G8, put the files in theses folders according to the file **label-original.txt**.
 
-3. To replicate the experiments described in the dissertation the sinthetic samples need to be generated. To perform thism, use the **generateData.cpp** code. In the begining of the file, change the values of the variables **originalDataFolder** and **syntheticDataFolder**, to the folder that contains the orignal data separated in the groups, with the **label-original.txt** file, and to the folder where the synthetic data will be stored (the groups folder, G1 to G8, need to create before the execution of this method).
+3. To replicate the experiments described in the dissertation the sinthetic samples need to be generated. To perform this, use the **generateData.cpp** code, stored in the tools folder.
 
-4. After these operations, run:
+4. To generate the synthetic data, from the caffe root directory, run:
 	- make all
-	- ./generateData
+	- ./tools/generateData
 
 5. Copy the files **solver.prototxt**, **train.prototxt** and **test.prototxt** to the same path of the synthetic samples. These files contains the network definitions (layers and others meta-parameters).
 
 #Run Training
-1. Open the file **trainDeepFace.cpp** and change the value of the variable dataPath to the folder where the synthetic samples are stored.
+1. The training source-code is stored in the file **trainDeepFace.cpp**, inside the tools folder.
 
-2. Run:
+2. From the caffe root directory, run:
 	- make all
-	- ./trainDeepFace
+	- ./tools/trainDeepFace
 
 #Run Testing
-1. Create a results folder in your data path (with the name **Results**)
 
-2. Open the file **trainDeepFace.cpp** and change the method called in tha Main, to test().
+2. Open the file **trainDeepFace.cpp** and change the method called in tha Main, to test(). Remember of commenting the line that calls the train() method.
 
-3. Run:
+3. From the caffe root directory, run:
 	- make all
-	- ./trainDeepFace
+	- ./tools/trainDeepFace
 
-4. Evaluate: Te files with the patter **summary_GT*IT0*.txt** are the best results, selected with the validation group.
+4. Evaluate: The files with the patter **summary_GT*IT0*.** are the best results, selected with the validation group. The **.txt** files, contains the confusion matrixes and the accuracy for both classifiers, the n-class and the binary. The **.net** files are the networks weights that archieve the results shown in the text files.
