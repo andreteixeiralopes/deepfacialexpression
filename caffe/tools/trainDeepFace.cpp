@@ -72,6 +72,12 @@ void readTrainData(TrainData* dadosTreino)
 					dadosTreino->validationLabels.push_back(getClassCKJ(expressao));
 				}
 			}
+			else{
+				if(fileImg.rows > 0){
+					dadosTreino->trainSamples.push_back(fileImg);
+					dadosTreino->trainLabels.push_back(getClassCKJ(expressao));
+				}
+			}
 		}
 	}
 	fclose(f);
