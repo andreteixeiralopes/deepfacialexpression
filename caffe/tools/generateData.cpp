@@ -33,8 +33,8 @@ using namespace boost::filesystem3;
 
 RNG rng;
 
-string originalDataFolder = "../../data/";
-string syntheticDataFolder = "../../data/synthetic/";
+string originalDataFolder = "../data/";
+string syntheticDataFolder = "../data/synthetic/";
 
 typedef
 		struct
